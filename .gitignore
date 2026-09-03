@@ -1,0 +1,15 @@
+.DS_Store
+.env
+.env*.local
+.next
+node_modules
+dist
+out
+coverage
+*.tsbuildinfo
+convex/.env.local
+.agents/
+.ok/
+skills-lock.json
+AGENTS.md
+CLAUDE.md
