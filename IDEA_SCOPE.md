@@ -583,7 +583,7 @@ Any change to these requires a written scope decision in section 15.
 
 ### active milestone
 
-M1 working locally. Next: configure Convex/OpenAI, collect UPI proof and real buyer audio, deploy to Vercel.
+M1 working locally with real OpenAI automation verified. Next: configure local Convex URL and UPI display fields, collect UPI proof and real buyer audio, deploy to Vercel.
 
 ### implemented
 
@@ -598,6 +598,7 @@ M1 working locally. Next: configure Convex/OpenAI, collect UPI proof and real bu
 - `npm run build` passes.
 - `npm run lint` passes.
 - Demo-mode API upload returns a storybook draft.
+- Real OpenAI API upload transcribes sample audio and generates a storybook draft.
 - Browser flow passes: fill intake, attach audio, generate draft, edit preview, export enabled.
 - Chromium PDF export creates a PDF from the storybook view.
 
@@ -612,11 +613,11 @@ M1 working locally. Next: configure Convex/OpenAI, collect UPI proof and real bu
 
 ### current blocker
 
-Need OpenAI API billing credits, first UPI payment proof, and first usable buyer audio sample. `OPENAI_API_KEY` is present locally and reaches OpenAI, but the API returned no credits remaining.
+Need local `NEXT_PUBLIC_CONVEX_URL`, local UPI display fields, first UPI payment proof, and first usable buyer audio sample. `OPENAI_API_KEY` is present locally and real sample generation works.
 
 ### next single action
 
-Add OpenAI API credits or switch to a funded API key, then collect Rs 400 by UPI from one committed buyer and ask them to send a 3-10 minute recording using the 12 prompts.
+Add `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_UPI_ID`, and `NEXT_PUBLIC_UPI_NAME` to `.env.local`, restart the dev server, then collect Rs 400 by UPI from one committed buyer and ask them to send a 3-10 minute recording using the 12 prompts.
 
 ## 15. decision log
 
