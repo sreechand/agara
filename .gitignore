@@ -9,6 +9,7 @@ coverage
 *.tsbuildinfo
 convex/.env.local
 .agents/
+.claude/
 .ok/
 skills-lock.json
 AGENTS.md
