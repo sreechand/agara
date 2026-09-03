@@ -11,9 +11,9 @@
 | Build starts | Sat 29 Aug 2026, 11:00 AM IST |
 | Submission deadline | Sat 5 Sep 2026, 11:00 AM IST |
 | Demo | Sat 5 Sep 2026, 3:00 PM IST |
-| Current milestone | M1 working locally; M0/M2 evidence still needs real UPI + buyer audio |
-| Live URL | Local dev: http://localhost:3000 |
-| Public repo | |
+| Current milestone | M1 live and verified with test input; M2 needs real UPI + buyer audio |
+| Live URL | https://agara-puce.vercel.app |
+| Public repo | https://github.com/sreechand/agara |
 | Last updated | Thu 3 Sep 2026 |
 
 ### status language
@@ -583,7 +583,7 @@ Any change to these requires a written scope decision in section 15.
 
 ### active milestone
 
-M1 working locally with real OpenAI automation verified. Next: configure local Convex URL and UPI display fields, collect UPI proof and real buyer audio, deploy to Vercel.
+M1 live and verified with real OpenAI automation and Convex evidence using a clearly labeled test input. Next: add public UPI display fields, collect UPI proof and real buyer audio.
 
 ### implemented
 
@@ -604,20 +604,24 @@ M1 working locally with real OpenAI automation verified. Next: configure local C
 
 ### live
 
-- Not deployed to Vercel yet.
+- Production URL: https://agara-puce.vercel.app
+- Public GitHub repo: https://github.com/sreechand/agara
+- Live Vercel test generated a storybook from sample audio with `gpt-5-mini`.
 
 ### verified
 
 - Desktop and mobile screenshots have no horizontal overflow.
 - Generated storybook editor renders with export enabled.
+- Live URL shows `Convex evidence`.
+- Live URL generated a storybook from sample audio in 16s and enabled export.
 
 ### current blocker
 
-Need local `NEXT_PUBLIC_CONVEX_URL`, local UPI display fields, first UPI payment proof, and first usable buyer audio sample. `OPENAI_API_KEY` is present locally and real sample generation works.
+Need `NEXT_PUBLIC_UPI_ID` and `NEXT_PUBLIC_UPI_NAME` in local and Vercel envs, first UPI payment proof, and first usable buyer audio sample. OpenAI and Convex are working on the live URL.
 
 ### next single action
 
-Add `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_UPI_ID`, and `NEXT_PUBLIC_UPI_NAME` to `.env.local`, restart the dev server, then collect Rs 400 by UPI from one committed buyer and ask them to send a 3-10 minute recording using the 12 prompts.
+Add `NEXT_PUBLIC_UPI_ID` and `NEXT_PUBLIC_UPI_NAME` to `.env.local` and Vercel production envs, redeploy, then collect Rs 400 by UPI from one committed buyer and ask them to send a 3-10 minute recording using the 12 prompts.
 
 ## 15. decision log
 
