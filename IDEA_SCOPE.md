@@ -612,11 +612,11 @@ M1 working locally. Next: configure Convex/OpenAI, collect UPI proof and real bu
 
 ### current blocker
 
-Need `OPENAI_API_KEY`, configured Convex deployment, first UPI payment proof, and first usable buyer audio sample.
+Need OpenAI API billing credits, first UPI payment proof, and first usable buyer audio sample. `OPENAI_API_KEY` is present locally and reaches OpenAI, but the API returned no credits remaining.
 
 ### next single action
 
-Set `OPENAI_API_KEY`, run `npx convex dev`, set `NEXT_PUBLIC_CONVEX_URL`, then collect Rs 400 by UPI from one committed buyer and ask them to send a 3-10 minute recording using the 12 prompts.
+Add OpenAI API credits or switch to a funded API key, then collect Rs 400 by UPI from one committed buyer and ask them to send a 3-10 minute recording using the 12 prompts.
 
 ## 15. decision log
 
