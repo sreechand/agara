@@ -11,7 +11,7 @@
 | Build starts | Sat 29 Aug 2026, 11:00 AM IST |
 | Submission deadline | Sat 5 Sep 2026, 11:00 AM IST |
 | Demo | Sat 5 Sep 2026, 3:00 PM IST |
-| Current milestone | M5 verification; private keyed buyer link flow implemented locally and needs live deployment/verification |
+| Current milestone | M5 verification; private keyed buyer link flow live and verified |
 | Live URL | https://agara-puce.vercel.app |
 | Public repo | https://github.com/sreechand/agara |
 | Last updated | Fri 4 Sep 2026 |
@@ -585,7 +585,7 @@ Any change to these requires a written scope decision in section 15.
 
 ### active milestone
 
-M5 verification. Private keyed buyer URL flow is implemented locally. Next: deploy it, verify the live keyed URL, then collect external payment proof and real buyer audio.
+M5 verification. Private keyed buyer URL flow is live and verified. Next: collect external payment proof and real buyer audio.
 
 ### implemented
 
@@ -616,14 +616,15 @@ M5 verification. Private keyed buyer URL flow is implemented locally. Next: depl
 - Generated storybook editor renders with export enabled.
 - Previous live URL generated a storybook from sample audio in 16s and enabled export.
 - Local private-key flow hides backend/payment controls and generated a storybook from sample audio.
+- Live private-key flow at `/?key=buyer-kk-001` hides backend/payment controls, generated a storybook from sample audio, and enabled export.
 
 ### current blocker
 
-Need the private-key flow deployed to Vercel, first external payment proof, and first usable buyer audio sample. OpenAI and Convex are working.
+Need first external payment proof and first usable buyer audio sample. OpenAI, Convex, and the private-key live URL are working.
 
 ### next single action
 
-Deploy the private-key flow, verify `https://agara-puce.vercel.app/?key=buyer-kk-001`, then collect Rs 400 from one committed buyer outside the app and ask them to upload a 3-10 minute recording using the 12 prompts.
+Collect Rs 400 from one committed buyer outside the app, send a unique link such as `https://agara-puce.vercel.app/?key=buyer-kk-001`, and ask them to upload a 3-10 minute recording using the 12 prompts.
 
 ## 15. decision log
 
