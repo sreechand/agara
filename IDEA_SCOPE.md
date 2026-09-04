@@ -619,6 +619,7 @@ M5 verification. Private keyed buyer URL flow is live and verified. Next: collec
 - Previous live URL generated a storybook from sample audio in 16s and enabled export.
 - Local private-key flow hides backend/payment controls and generated a storybook from sample audio.
 - Live private-key flow at `/?key=buyer-kk-001` hides backend/payment controls, generated a storybook from sample audio, and enabled export.
+- Live 6.4 MB audio upload at `/?key=buyer-6mb-live` generated a storybook through Convex storage and did not hit the JSON parse/request-size error.
 
 ### current blocker
 
