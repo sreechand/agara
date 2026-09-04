@@ -136,7 +136,7 @@ These prompts are shown to the buyer before they record the conversation.
 | Payment proof | External screenshot or manual confirmation | Payment is outside the app and not shown to the buyer in-product | Builder matches payment proof to the private key |
 | Buyer identity | Email and name | Must be real enough to identify the buyer | Required email field saved to Convex |
 | Relationship details | Text fields | Nani/Dadu/Ajji/Thatha/Patti/Aaji/Ajoba/generic labels | Required grandparent or parent name and relationship |
-| Audio recording | mp3, m4a, wav, mp4, webm where supported | Up to 10 minutes; mixed languages; background noise | File type check, size check, visible upload status |
+| Audio recording | mp3, m4a, wav, mp4, webm where supported | Up to 10 minutes and 100 MB; mixed languages; background noise | File type check, size check, direct Convex storage upload before transcription |
 | Names and places | Text area | Transcription may miss proper nouns | Required helper field before transcription |
 | Photos | 0-3 image uploads | Family images may be low quality | Optional; max 3 files; visible preview before generation |
 
@@ -592,6 +592,7 @@ M5 verification. Private keyed buyer URL flow is live and verified. Next: collec
 - Next.js app scaffold with upload/intake workbench.
 - OpenAI-backed generation API route with demo fallback when `OPENAI_API_KEY` is missing.
 - Convex schema and mutations for keyed runs and waitlist evidence.
+- Convex storage upload path for audio before transcription.
 - Local evidence fallback when `NEXT_PUBLIC_CONVEX_URL` is missing.
 - Editable storybook preview with transcript review and PDF/export path.
 
@@ -602,6 +603,7 @@ M5 verification. Private keyed buyer URL flow is live and verified. Next: collec
 - Demo-mode API upload returns a storybook draft.
 - Real OpenAI API upload transcribes sample audio and generates a storybook draft.
 - Browser flow passes: fill intake, attach audio, generate draft, edit preview, export enabled.
+- Local browser flow passes through Convex storage upload before transcription.
 - Chromium PDF export creates a PDF from the storybook view.
 
 ### live

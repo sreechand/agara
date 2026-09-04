@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { ConvexHttpClient } from "convex/browser";
 
 import {
   buildStoryPrompt,
@@ -8,6 +9,8 @@ import {
   type IntakePayload
 } from "@/lib/storybook";
 import { maxAudioBytes } from "@/lib/files";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 
 export const runtime = "nodejs";
 
@@ -15,9 +18,7 @@ export async function POST(request: Request) {
   const startedAt = Date.now();
 
   try {
-    const formData = await request.formData();
-    const audio = formData.get("audio");
-    const input = readIntake(formData);
+    const { input, audio } = await readRequest(request);
 
     if (!(audio instanceof File)) {
       return NextResponse.json(
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
 
     if (audio.size > maxAudioBytes) {
       return NextResponse.json(
-        { error: "The recording is too large. Keep v1 recordings under 25 MB." },
+        { error: "The recording is too large. Keep v1 recordings under 100 MB." },
         { status: 400 }
       );
     }
@@ -81,6 +82,71 @@ function getText(formData: FormData, key: keyof IntakePayload) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+async function readRequest(request: Request): Promise<{ input: IntakePayload; audio: File | null }> {
+  const contentType = request.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    const payload = (await request.json()) as {
+      input?: Partial<IntakePayload>;
+      audioStorageId?: Id<"_storage">;
+    };
+
+    return {
+      input: readJsonIntake(payload.input || {}),
+      audio: payload.audioStorageId ? await readStoredAudio(payload.audioStorageId) : null
+    };
+  }
+
+  const formData = await request.formData();
+  const audio = formData.get("audio");
+  return {
+    input: readIntake(formData),
+    audio: audio instanceof File ? audio : null
+  };
+}
+
+function readJsonIntake(input: Partial<IntakePayload>): IntakePayload {
+  return {
+    accessKey: cleanText(input.accessKey),
+    buyerName: cleanText(input.buyerName),
+    email: cleanText(input.email),
+    elderName: cleanText(input.elderName),
+    relationship: cleanText(input.relationship),
+    originPlace: cleanText(input.originPlace),
+    languageMix: cleanText(input.languageMix),
+    preserveWords: cleanText(input.preserveWords),
+    dedication: cleanText(input.dedication),
+    paymentReference: cleanText(input.paymentReference),
+    notes: cleanText(input.notes)
+  };
+}
+
+function cleanText(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+async function readStoredAudio(storageId: Id<"_storage">) {
+  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+  if (!convexUrl) {
+    throw new Error("Convex is not configured for stored audio processing.");
+  }
+
+  const convex = new ConvexHttpClient(convexUrl);
+  const fileUrl = await convex.query(api.files.getUrl, { storageId });
+  if (!fileUrl) {
+    throw new Error("Uploaded audio could not be found.");
+  }
+
+  const response = await fetch(fileUrl);
+  if (!response.ok) {
+    throw new Error("Uploaded audio could not be loaded for transcription.");
+  }
+
+  const blob = await response.blob();
+  return new File([blob], "interview-audio", {
+    type: blob.type || response.headers.get("content-type") || "audio/mpeg"
+  });
+}
+
 async function transcribe(openai: OpenAI, audio: File, input: IntakePayload) {
   const model = process.env.OPENAI_TRANSCRIBE_MODEL || "gpt-4o-mini-transcribe";
   const prompt = [
@@ -89,13 +155,23 @@ async function transcribe(openai: OpenAI, audio: File, input: IntakePayload) {
     `Preserve these names and places exactly where possible: ${input.preserveWords || "none supplied"}.`
   ].join(" ");
 
-  const transcription = await openai.audio.transcriptions.create({
-    file: audio,
-    model,
-    prompt
-  });
+  try {
+    const transcription = await openai.audio.transcriptions.create({
+      file: audio,
+      model,
+      prompt
+    });
 
-  return transcription.text;
+    return transcription.text;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message.includes("25 MB") || message.includes("maximum") || message.includes("too large")) {
+      throw new Error(
+        "The recording uploaded, but the transcription model could not process it. Compress the audio to mp3/m4a or trim it to the strongest 10 minutes."
+      );
+    }
+    throw error;
+  }
 }
 
 async function generateDraft(openai: OpenAI, input: IntakePayload, transcript: string) {

@@ -10,6 +10,7 @@ import {
 import { ConvexProvider, ConvexReactClient, useMutation } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 
 type CreateRunInput = {
   accessKey?: string;
@@ -21,12 +22,14 @@ type CreateRunInput = {
   languageMix: string;
   paymentReference: string;
   paymentStatus: "pending" | "received";
+  audioStorageId?: Id<"_storage">;
   hasAudio: boolean;
   photoCount: number;
 };
 
 type EvidenceContextValue = {
   backend: "convex" | "local";
+  uploadAudio: (file: File) => Promise<Id<"_storage"> | null>;
   createRun: (input: CreateRunInput) => Promise<string>;
   markGenerating: (id: string) => Promise<void>;
   markDraftReady: (id: string, title: string) => Promise<void>;
@@ -60,6 +63,7 @@ export function useEvidence() {
 }
 
 function ConvexEvidenceProvider({ children }: { children: ReactNode }) {
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const create = useMutation(api.runs.createRun);
   const generating = useMutation(api.runs.markGenerating);
   const ready = useMutation(api.runs.markDraftReady);
@@ -69,6 +73,25 @@ function ConvexEvidenceProvider({ children }: { children: ReactNode }) {
   const value = useMemo<EvidenceContextValue>(
     () => ({
       backend: "convex",
+      uploadAudio: async (file) => {
+        const uploadUrl = await generateUploadUrl();
+        const response = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": file.type || "application/octet-stream" },
+          body: file
+        });
+
+        if (!response.ok) {
+          throw new Error("Audio upload failed. Try a smaller compressed mp3 or m4a file.");
+        }
+
+        const result = (await response.json()) as { storageId?: Id<"_storage"> };
+        if (!result.storageId) {
+          throw new Error("Audio upload did not return a storage id.");
+        }
+
+        return result.storageId;
+      },
       createRun: async (input) => String(await create(input)),
       markGenerating: async (id) => {
         await generating({ id: id as never });
@@ -83,7 +106,7 @@ function ConvexEvidenceProvider({ children }: { children: ReactNode }) {
         await failed({ id: id as never, error });
       }
     }),
-    [create, exported, failed, generating, ready]
+    [create, exported, failed, generateUploadUrl, generating, ready]
   );
 
   return <EvidenceContext.Provider value={value}>{children}</EvidenceContext.Provider>;
@@ -111,6 +134,7 @@ function LocalEvidenceProvider({ children }: { children: ReactNode }) {
   const value = useMemo<EvidenceContextValue>(
     () => ({
       backend: "local",
+      uploadAudio: async () => null,
       createRun: async (input) => {
         const id = `local-${Date.now()}`;
         save(id, {

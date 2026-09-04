@@ -12,6 +12,7 @@ export const createRun = mutation({
     languageMix: v.string(),
     paymentReference: v.string(),
     paymentStatus: v.union(v.literal("pending"), v.literal("received")),
+    audioStorageId: v.optional(v.id("_storage")),
     hasAudio: v.boolean(),
     photoCount: v.number()
   },

@@ -12,6 +12,7 @@ export default defineSchema({
     languageMix: v.string(),
     paymentReference: v.string(),
     paymentStatus: v.union(v.literal("pending"), v.literal("received")),
+    audioStorageId: v.optional(v.id("_storage")),
     status: v.union(
       v.literal("created"),
       v.literal("generating"),

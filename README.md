@@ -2,6 +2,8 @@
 
 Build Week Revenue product: paid buyers upload one family interview recording and receive an editable keepsake storybook with a PDF/export path.
 
+Production audio uploads go directly to Convex storage before transcription, so buyer recordings above Vercel's function body limit do not hit the API route as multipart uploads.
+
 ## Local setup
 
 1. Install dependencies:

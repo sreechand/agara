@@ -97,6 +97,18 @@ export function StorybookApp() {
       return;
     }
 
+    setStatus("generating");
+
+    let audioStorageId: Awaited<ReturnType<typeof evidence.uploadAudio>> = null;
+    try {
+      audioStorageId = await evidence.uploadAudio(audio as File);
+    } catch (error) {
+      const text = error instanceof Error ? error.message : "Audio upload failed.";
+      setStatus("failed");
+      setMessage(text);
+      return;
+    }
+
     const runId = await evidence.createRun({
       accessKey,
       buyerName: intake.buyerName,
@@ -107,26 +119,31 @@ export function StorybookApp() {
       languageMix: intake.languageMix,
       paymentReference,
       paymentStatus: "received",
+      audioStorageId: audioStorageId || undefined,
       hasAudio: Boolean(audio),
       photoCount: photos.length
     });
     runIdRef.current = runId;
 
     try {
-      setStatus("generating");
       await evidence.markGenerating(runId);
 
-      const body = new FormData();
-      Object.entries({ ...intake, accessKey, paymentReference }).forEach(([key, value]) =>
-        body.append(key, value)
-      );
-      body.append("audio", audio as File);
+      const requestPayload = { input: { ...intake, accessKey, paymentReference }, audioStorageId };
+      const fallbackBody = new FormData();
+      Object.entries(requestPayload.input).forEach(([key, value]) => fallbackBody.append(key, value));
+      fallbackBody.append("audio", audio as File);
 
-      const response = await fetch("/api/generate-storybook", {
-        method: "POST",
-        body
-      });
-      const result = (await response.json()) as GenerateResponse;
+      const response = await fetch("/api/generate-storybook", audioStorageId
+        ? {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestPayload)
+          }
+        : {
+            method: "POST",
+            body: fallbackBody
+          });
+      const result = (await readGenerateResponse(response)) as GenerateResponse;
 
       if (!response.ok || !result.draft) {
         throw new Error(result.error || "The storybook could not be generated.");
@@ -318,7 +335,7 @@ export function StorybookApp() {
             <label className="upload-card">
               <Upload size={22} aria-hidden />
               <span>{audio ? audio.name : "Upload interview audio"}</span>
-              <small>mp3, m4a, wav, mp4 or webm. Keep it under 10 minutes.</small>
+              <small>mp3, m4a, wav, mp4 or webm. Keep it under 100 MB.</small>
               <input
                 type="file"
                 accept="audio/*,video/mp4,.m4a,.mp3,.wav,.webm"
@@ -437,6 +454,21 @@ export function StorybookApp() {
       </section>
     </main>
   );
+}
+
+async function readGenerateResponse(response: Response): Promise<GenerateResponse> {
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    return response.json();
+  }
+
+  const text = await response.text();
+  return {
+    error:
+      response.status === 413
+        ? "The recording is too large for this upload path. Try a compressed mp3 or m4a file."
+        : text || "The storybook server returned an unexpected response."
+  };
 }
 
 function StorybookEditor({

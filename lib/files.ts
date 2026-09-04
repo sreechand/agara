@@ -14,7 +14,7 @@ export const acceptedAudioTypes = [
   "video/mp4"
 ];
 
-export const maxAudioBytes = 25 * 1024 * 1024;
+export const maxAudioBytes = 100 * 1024 * 1024;
 
 export function validateAudioFile(file: File | null) {
   if (!file) {
@@ -22,7 +22,7 @@ export function validateAudioFile(file: File | null) {
   }
 
   if (file.size > maxAudioBytes) {
-    return "The recording is too large. Keep v1 recordings under 25 MB and about 10 minutes.";
+    return "The recording is too large. Keep v1 recordings under 100 MB and about 10 minutes.";
   }
 
   const lowerName = file.name.toLowerCase();
