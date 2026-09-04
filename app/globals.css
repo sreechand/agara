@@ -9,6 +9,7 @@
   --marigold: #d79a2b;
   --leaf: #506d57;
   --rose: #b76f68;
+  --slate-ink: #536b75;
   --line: rgba(52, 35, 24, 0.14);
   --line-strong: rgba(52, 35, 24, 0.24);
   --focus: rgba(168, 95, 55, 0.35);
@@ -418,18 +419,82 @@ textarea {
   display: flex;
   justify-content: center;
   border-radius: 12px;
-  background: linear-gradient(90deg, rgba(36, 27, 23, 0.05) 0, transparent 18%, transparent 82%, rgba(36, 27, 23, 0.04) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(36, 27, 23, 0.05) 0,
+    transparent 18%,
+    transparent 82%,
+    rgba(36, 27, 23, 0.04) 100%
+  );
   padding: 24px;
 }
 
 .book {
-  width: min(100%, 760px);
-  min-height: 960px;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(360px, 1.1fr);
+  gap: 0;
+  width: min(100%, 980px);
+  min-height: 940px;
   border: 1px solid rgba(52, 35, 24, 0.16);
   border-radius: 6px;
-  background: var(--paper);
+  background:
+    radial-gradient(circle at 18% 22%, rgba(80, 67, 52, 0.11) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 72% 28%, rgba(168, 95, 55, 0.09) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 34% 78%, rgba(80, 109, 87, 0.08) 0 0.8px, transparent 1.4px),
+    linear-gradient(100deg, rgba(255, 255, 255, 0.38), rgba(248, 237, 218, 0.2) 42%, rgba(120, 83, 48, 0.08)),
+    var(--paper);
+  background-size: 18px 18px, 26px 26px, 34px 34px, auto, auto;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5) inset, 0 20px 45px rgba(72, 44, 25, 0.16);
+  overflow: hidden;
+}
+
+.book::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(82deg, transparent 0 12%, rgba(105, 77, 48, 0.04) 13%, transparent 14% 100%),
+    repeating-linear-gradient(0deg, rgba(60, 45, 32, 0.035) 0 1px, transparent 1px 7px);
+  content: "";
+  opacity: 0.62;
+  pointer-events: none;
+}
+
+.book::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 44%;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(52, 35, 24, 0.18) 16%,
+    rgba(52, 35, 24, 0.08) 84%,
+    transparent
+  );
+  content: "";
+  pointer-events: none;
+}
+
+.visual-page,
+.text-page {
+  min-width: 0;
   padding: 44px;
+}
+
+.visual-page {
+  display: grid;
+  align-content: start;
+  gap: 30px;
+  min-height: 940px;
+  background: rgba(255, 250, 240, 0.18);
+}
+
+.text-page {
+  background: rgba(255, 250, 240, 0.32);
 }
 
 .book-cover {
@@ -440,24 +505,11 @@ textarea {
   text-align: center;
 }
 
-.cover-mark {
-  justify-self: center;
-  border: 1px solid rgba(168, 95, 55, 0.28);
-  border-radius: 999px;
-  color: var(--sepia);
-  padding: 6px 12px;
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 11px;
-  font-weight: 760;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
 .book-title,
 .book-subtitle,
 .book-dedication,
-.story-section input,
-.story-section textarea,
+.story-section-heading,
+.story-section-body,
 .closing-note textarea,
 .language-note textarea {
   border: 0;
@@ -478,16 +530,18 @@ textarea {
   min-height: 112px;
   padding: 0;
   text-align: center;
-  font-size: 48px;
+  font-family: ui-serif, Georgia, "Noto Serif Devanagari", "Noto Serif Tamil", "Noto Serif Telugu",
+    "Times New Roman", serif;
+  font-size: 42px;
   font-weight: 650;
-  line-height: 1.02;
+  line-height: 1.08;
 }
 
 .book-subtitle {
   padding: 0;
   text-align: center;
   color: var(--ink-soft);
-  font-size: 21px;
+  font-size: 19px;
   font-style: italic;
 }
 
@@ -501,66 +555,135 @@ textarea {
   line-height: 1.45;
 }
 
-.photo-strip {
+.scrapbook-photos {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin: 30px 0 10px;
+  justify-items: center;
+  gap: 14px;
+  margin-top: 4px;
 }
 
-.photo-strip figure {
+.polaroid {
+  position: relative;
+  width: min(82%, 230px);
   margin: 0;
+  background: #fffdf7;
+  box-shadow: 0 12px 28px rgba(72, 44, 25, 0.15);
+  padding: 10px 10px 28px;
 }
 
-.photo-strip img {
+.polaroid::before {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  width: 72px;
+  height: 22px;
+  background: rgba(236, 222, 190, 0.72);
+  box-shadow: 0 1px 2px rgba(72, 44, 25, 0.08);
+  content: "";
+  transform: translateX(-50%) rotate(-2deg);
+}
+
+.polaroid-1 {
+  transform: rotate(-2.2deg);
+}
+
+.polaroid-2 {
+  transform: rotate(1.8deg);
+}
+
+.polaroid-3 {
+  transform: rotate(-0.8deg);
+}
+
+.polaroid img {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 2px;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
 }
 
-.photo-strip figcaption {
-  margin-top: 6px;
+.polaroid figcaption {
+  margin-top: 10px;
   color: var(--ink-muted);
+  font-family: ui-serif, Georgia, "Noto Serif Devanagari", "Noto Serif Tamil", "Noto Serif Telugu",
+    "Times New Roman", serif;
   font-size: 12px;
   line-height: 1.35;
   text-align: center;
 }
 
-.illustration-fallback {
-  display: grid;
-  place-items: center;
-  gap: 12px;
-  min-height: 160px;
-  margin: 30px 0 10px;
-  border: 1px solid rgba(168, 95, 55, 0.18);
-  border-radius: 6px;
-  background: repeating-linear-gradient(
-      135deg,
-      rgba(168, 95, 55, 0.06),
-      rgba(168, 95, 55, 0.06) 1px,
-      transparent 1px,
-      transparent 12px
-    ),
-    var(--paper-deep);
-  padding: 22px;
-  text-align: center;
+.field-note-poster {
+  position: relative;
+  width: min(100%, 360px);
+  aspect-ratio: 1;
+  justify-self: center;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(52, 35, 24, 0.1) 0 0.8px, transparent 1.5px),
+    radial-gradient(circle at 76% 70%, rgba(168, 95, 55, 0.08) 0 0.8px, transparent 1.4px),
+    linear-gradient(105deg, rgba(255, 253, 247, 0.52), rgba(248, 237, 218, 0.2)),
+    var(--paper);
+  background-size: 19px 19px, 31px 31px, auto, auto;
 }
 
-.sun-disc {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--marigold) 0 45%, rgba(215, 154, 43, 0.22) 46% 100%);
+.field-note-poster::after {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(88deg, rgba(52, 35, 24, 0.035) 0 1px, transparent 1px 9px),
+    radial-gradient(circle at 64% 38%, rgba(72, 44, 25, 0.06), transparent 14%);
+  content: "";
+  pointer-events: none;
+  mix-blend-mode: multiply;
 }
 
-.illustration-fallback p {
-  max-width: 560px;
-  margin: 0;
-  color: var(--ink-soft);
-  font-size: 14px;
-  line-height: 1.5;
+.stamp-scene {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.stamp-form path,
+.stamp-impression > path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.stamp-dark {
+  stroke: rgba(36, 27, 23, 0.78);
+}
+
+.stamp-ochre {
+  fill: rgba(215, 154, 43, 0.15);
+  stroke: rgba(159, 108, 36, 0.62);
+  transform: translate(1px, -1px);
+}
+
+.stamp-brick {
+  fill: rgba(183, 111, 104, 0.14);
+  stroke: rgba(143, 61, 50, 0.58);
+  transform: translate(-1px, 1px);
+}
+
+.stamp-green {
+  fill: rgba(80, 109, 87, 0.13);
+  stroke: rgba(61, 92, 67, 0.62);
+  transform: translate(1px, 1px);
+}
+
+.stamp-blue {
+  stroke: rgba(83, 107, 117, 0.62);
+  transform: translate(-1px, -1px);
+}
+
+.stamp-ghost {
+  stroke: rgba(168, 95, 55, 0.16);
+  stroke-width: 3;
 }
 
 .language-note {
@@ -594,7 +717,8 @@ textarea {
   border-top: 1px solid var(--line);
 }
 
-.story-section input {
+.story-section-heading {
+  min-height: 68px;
   padding: 0;
   color: var(--leaf);
   font-size: 28px;
@@ -602,7 +726,7 @@ textarea {
   line-height: 1.16;
 }
 
-.story-section textarea,
+.story-section-body,
 .closing-note textarea {
   min-height: 160px;
   padding: 0;
@@ -708,13 +832,25 @@ textarea {
   .field-grid,
   .upload-zone,
   .action-row,
-  .access-box,
-  .photo-strip {
+  .access-box {
     grid-template-columns: 1fr;
   }
 
   .book {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .book::after {
+    display: none;
+  }
+
+  .visual-page,
+  .text-page {
     padding: 28px 20px;
+  }
+
+  .visual-page {
     min-height: auto;
   }
 
@@ -726,20 +862,20 @@ textarea {
     font-size: 36px;
   }
 
-  .story-section input {
+  .story-section-heading {
     font-size: 24px;
   }
 }
 
 @media print {
   @page {
-    margin: 14mm;
-    size: A4;
+    margin: 10mm;
+    size: A4 landscape;
   }
 
   html,
   body {
-    background: white;
+    background: var(--paper);
   }
 
   .screen-only,
@@ -760,7 +896,7 @@ textarea {
     margin: 0;
     padding: 0;
     border: 0;
-    background: white;
+    background: var(--paper);
     box-shadow: none;
   }
 
@@ -769,7 +905,11 @@ textarea {
     min-height: 0;
     border: 0;
     box-shadow: none;
-    padding: 0;
+  }
+
+  .visual-page,
+  .text-page {
+    padding: 16px;
   }
 
   input,
@@ -782,8 +922,8 @@ textarea {
   }
 
   .story-section,
-  .photo-strip,
-  .illustration-fallback {
+  .polaroid,
+  .field-note-poster {
     break-inside: avoid;
   }
 }

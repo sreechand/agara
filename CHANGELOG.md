@@ -6,3 +6,4 @@
 - Thu 3 Sep 2026: The product is live on Vercel, connected to GitHub and Convex, and a live test input generated an editable storybook.
 - Fri 4 Sep 2026: Buyers can use a private keyed link to generate a storybook without seeing backend or payment controls.
 - Fri 4 Sep 2026: Audio uploads now go through Convex storage first, so larger buyer recordings can bypass Vercel's request body limit.
+- Fri 4 Sep 2026: Storybooks now preserve the audio language, render as a two-page aged-paper spread, show a small rubber-stamp field-note illustration, and turn uploaded photos into scrapbook Polaroids.

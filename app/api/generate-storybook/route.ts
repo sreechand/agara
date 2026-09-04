@@ -151,6 +151,7 @@ async function transcribe(openai: OpenAI, audio: File, input: IntakePayload) {
   const model = process.env.OPENAI_TRANSCRIBE_MODEL || "gpt-4o-mini-transcribe";
   const prompt = [
     `This is a family interview for a keepsake storybook.`,
+    `Transcribe in the original spoken language and script where possible. Do not translate into English.`,
     `The speaker may use ${input.languageMix || "English, Hindi, Tamil, Telugu, or a mix"}.`,
     `Preserve these names and places exactly where possible: ${input.preserveWords || "none supplied"}.`
   ].join(" ");

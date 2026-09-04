@@ -13,7 +13,7 @@ import {
   Sparkles,
   Upload
 } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { useEvidence } from "@/app/providers";
@@ -484,82 +484,256 @@ function StorybookEditor({
 }) {
   return (
     <article className="book">
-      <section className="book-cover">
-        <div className="cover-mark">Family Story</div>
-        <textarea
-          className="book-title"
-          value={draft.title}
-          onChange={(event) => onDraftChange("title", event.target.value)}
-          aria-label="Storybook title"
-          rows={2}
-        />
-        <input
-          className="book-subtitle"
-          value={draft.subtitle}
-          onChange={(event) => onDraftChange("subtitle", event.target.value)}
-          aria-label="Storybook subtitle"
-        />
-        <textarea
-          className="book-dedication"
-          value={draft.dedication}
-          onChange={(event) => onDraftChange("dedication", event.target.value)}
-          aria-label="Dedication"
-          rows={3}
-        />
+      <section className="visual-page" aria-label="Storybook illustration page">
+        <StampPoster draft={draft} />
+        {photos.length ? <PolaroidPhotos draft={draft} photos={photos} /> : null}
       </section>
 
-      {photos.length ? (
-        <section className="photo-strip">
-          {photos.map((photo, index) => (
-            <figure key={photo.id}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.url} alt={photo.name} />
-              <figcaption>{draft.photoCaptions[index] || photo.name}</figcaption>
-            </figure>
-          ))}
-        </section>
-      ) : (
-        <section className="illustration-fallback" aria-label="Illustration fallback">
-          <div className="sun-disc" />
-          <p>{draft.illustrationBrief}</p>
-        </section>
-      )}
-
-      <section className="language-note">
-        <AlertTriangle size={16} aria-hidden />
-        <textarea
-          value={draft.languageNote}
-          onChange={(event) => onDraftChange("languageNote", event.target.value)}
-          rows={2}
-          aria-label="Language review note"
-        />
-      </section>
-
-      {draft.sections.map((section) => (
-        <section className="story-section" key={section.id}>
+      <section className="text-page" aria-label="Editable storybook text page">
+        <section className="book-cover">
+          <AutoSizeTextArea
+            className="book-title"
+            value={draft.title}
+            onChange={(value) => onDraftChange("title", value)}
+            ariaLabel="Storybook title"
+            rows={2}
+          />
           <input
-            value={section.heading}
-            onChange={(event) => onSectionChange(section.id, { heading: event.target.value })}
-            aria-label={`Heading for ${section.id}`}
+            className="book-subtitle"
+            value={draft.subtitle}
+            onChange={(event) => onDraftChange("subtitle", event.target.value)}
+            aria-label="Storybook subtitle"
           />
-          <textarea
-            value={section.body}
-            onChange={(event) => onSectionChange(section.id, { body: event.target.value })}
-            rows={7}
-            aria-label={`Body for ${section.id}`}
+          <AutoSizeTextArea
+            className="book-dedication"
+            value={draft.dedication}
+            onChange={(value) => onDraftChange("dedication", value)}
+            ariaLabel="Dedication"
+            rows={3}
           />
         </section>
-      ))}
 
-      <section className="closing-note">
-        <textarea
-          value={draft.closingNote}
-          onChange={(event) => onDraftChange("closingNote", event.target.value)}
-          rows={4}
-          aria-label="Closing note"
-        />
+        <section className="language-note">
+          <AlertTriangle size={16} aria-hidden />
+          <AutoSizeTextArea
+            value={draft.languageNote}
+            onChange={(value) => onDraftChange("languageNote", value)}
+            rows={2}
+            ariaLabel="Language review note"
+          />
+        </section>
+
+        {draft.sections.map((section) => (
+          <section className="story-section" key={section.id}>
+            <AutoSizeTextArea
+              className="story-section-heading"
+              value={section.heading}
+              onChange={(value) => onSectionChange(section.id, { heading: value })}
+              rows={2}
+              ariaLabel={`Heading for ${section.id}`}
+            />
+            <AutoSizeTextArea
+              className="story-section-body"
+              value={section.body}
+              onChange={(value) => onSectionChange(section.id, { body: value })}
+              rows={7}
+              ariaLabel={`Body for ${section.id}`}
+            />
+          </section>
+        ))}
+
+        <section className="closing-note">
+          <AutoSizeTextArea
+            value={draft.closingNote}
+            onChange={(value) => onDraftChange("closingNote", value)}
+            rows={4}
+            ariaLabel="Closing note"
+          />
+        </section>
       </section>
     </article>
+  );
+}
+
+function PolaroidPhotos({ draft, photos }: { draft: StorybookDraft; photos: PhotoPreview[] }) {
+  return (
+    <section className="scrapbook-photos" aria-label="Uploaded family photos">
+      {photos.map((photo, index) => (
+        <figure className={`polaroid polaroid-${(index % 3) + 1}`} key={photo.id}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={photo.url} alt={photo.name} />
+          <figcaption>{draft.photoCaptions[index] || photo.name}</figcaption>
+        </figure>
+      ))}
+    </section>
+  );
+}
+
+function StampPoster({ draft }: { draft: StorybookDraft }) {
+  const roughId = useId().replaceAll(":", "");
+  const stampKinds = deriveStampKinds(draft);
+
+  return (
+    <section className="field-note-poster" aria-label={draft.illustrationBrief || draft.stampSubject}>
+      <svg className="stamp-scene" viewBox="0 0 360 360" role="img" aria-hidden="true">
+        <defs>
+          <filter id={roughId}>
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.9"
+              numOctaves="2"
+              seed="8"
+              result="noise"
+            />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2" />
+          </filter>
+        </defs>
+        <g className="stamp-impression" filter={`url(#${roughId})`}>
+          <path
+            className="stamp-ghost"
+            d="M50 295c44-16 82-18 118-7 42 13 81 8 137-16"
+          />
+          {stampKinds.map((kind, index) => renderStampShape(kind, index))}
+          <path className="stamp-dark" d="M44 292c52 10 108 7 156-4 42-10 73-9 113 3" />
+        </g>
+      </svg>
+    </section>
+  );
+}
+
+type StampKind = "landmark" | "home" | "food" | "water" | "tree" | "object";
+
+function deriveStampKinds(draft: StorybookDraft): StampKind[] {
+  const text = [
+    draft.stampSubject,
+    ...(draft.stampMotifs || []),
+    draft.illustrationBrief,
+    draft.title,
+    draft.subtitle
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  const selected: StampKind[] = [];
+  const add = (kind: StampKind) => {
+    if (!selected.includes(kind)) {
+      selected.push(kind);
+    }
+  };
+
+  if (/temple|mandir|church|mosque|market|bazaar|arch|palace|fort|school|station/.test(text)) {
+    add("landmark");
+  }
+  if (/home|house|door|courtyard|room|kitchen|street|village|lane/.test(text)) {
+    add("home");
+  }
+  if (/coffee|tea|food|smell|rice|mango|pickle|meal|kitchen|tiffin|sweet/.test(text)) {
+    add("food");
+  }
+  if (/river|lake|sea|rain|water|well|shore|pond|monsoon/.test(text)) {
+    add("water");
+  }
+  if (/tree|garden|field|farm|leaf|flower|jasmine|coconut/.test(text)) {
+    add("tree");
+  }
+  if (/photo|object|book|letter|radio|clock|sari|saree|toy|tool/.test(text)) {
+    add("object");
+  }
+
+  (["landmark", "home", "food", "water"] as StampKind[]).forEach(add);
+  return selected.slice(0, 5);
+}
+
+function renderStampShape(kind: StampKind, index: number) {
+  const x = 54 + index * 54;
+
+  switch (kind) {
+    case "landmark":
+      return (
+        <g className="stamp-form" key={`${kind}-${index}`} transform={`translate(${x} 212)`}>
+          <path className="stamp-ochre" d="M4 62h44v24H4z" />
+          <path className="stamp-dark" d="M7 86V50c0-18 10-30 19-30s19 12 19 30v36" />
+          <path className="stamp-brick" d="M16 86V61c0-9 5-15 10-15s10 6 10 15v25" />
+          <path className="stamp-dark" d="M2 50h48M8 38h36M26 8v13" />
+        </g>
+      );
+    case "home":
+      return (
+        <g className="stamp-form" key={`${kind}-${index}`} transform={`translate(${x} 222)`}>
+          <path className="stamp-green" d="M4 40 27 18l24 22" />
+          <path className="stamp-dark" d="M11 40v42h33V40" />
+          <path className="stamp-ochre" d="M24 82V57h10v25" />
+          <path className="stamp-dark" d="M18 51h8M37 51h7" />
+        </g>
+      );
+    case "food":
+      return (
+        <g className="stamp-form" key={`${kind}-${index}`} transform={`translate(${x} 231)`}>
+          <path className="stamp-brick" d="M12 24h30l-5 43H17z" />
+          <path className="stamp-dark" d="M8 24h38M17 67h21M18 12c3-8 15-8 18 0" />
+          <path className="stamp-ochre" d="M12 77c11 6 23 6 35 0" />
+        </g>
+      );
+    case "water":
+      return (
+        <g className="stamp-form" key={`${kind}-${index}`} transform={`translate(${x} 242)`}>
+          <path className="stamp-blue" d="M2 24c14-11 25 11 40 0s27 9 43-1" />
+          <path className="stamp-blue" d="M8 43c12-9 23 8 37-1s23 8 37-2" />
+          <path className="stamp-dark" d="M16 65c16-5 34-5 52 0" />
+        </g>
+      );
+    case "tree":
+      return (
+        <g className="stamp-form" key={`${kind}-${index}`} transform={`translate(${x} 218)`}>
+          <path className="stamp-green" d="M27 12c24 6 28 39 4 48-28 7-38-27-17-42 4-4 8-6 13-6z" />
+          <path className="stamp-dark" d="M28 55v31M18 86h25M28 65l-12-12M29 70l15-17" />
+        </g>
+      );
+    case "object":
+      return (
+        <g className="stamp-form" key={`${kind}-${index}`} transform={`translate(${x} 228)`}>
+          <path className="stamp-ochre" d="M9 17h41v54H9z" />
+          <path className="stamp-dark" d="M13 21h33v33H13zM13 71h33M18 61h22" />
+          <path className="stamp-brick" d="M19 47 29 35l10 12" />
+        </g>
+      );
+  }
+}
+
+function AutoSizeTextArea({
+  ariaLabel,
+  className,
+  onChange,
+  rows,
+  value
+}: {
+  ariaLabel: string;
+  className?: string;
+  onChange: (value: string) => void;
+  rows: number;
+  value: string;
+}) {
+  const ref = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) {
+      return;
+    }
+
+    element.style.height = "auto";
+    element.style.height = `${element.scrollHeight}px`;
+  }, [value]);
+
+  return (
+    <textarea
+      aria-label={ariaLabel}
+      className={className}
+      onChange={(event) => onChange(event.target.value)}
+      ref={ref}
+      rows={rows}
+      value={value}
+    />
   );
 }
 

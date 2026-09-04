@@ -99,7 +99,7 @@ The product must automate the core transformation. Manual work is allowed only t
 | Intake | Capture private key, buyer details, helper names/places, audio, and optional photos | Builder collects payment outside the platform before sending the key | Reviewer sees the keyed run recorded in Convex |
 | Transcription | Convert uploaded audio into transcript text | Builder or buyer may correct names, places, and mistranscribed phrases | Fresh demo audio produces a transcript without manual typing |
 | Story shaping | Turn transcript into title, dedication, 3-5 story sections, captions, and closing note | Buyer/builder may edit wording before export | Fresh demo transcript produces a coherent story draft automatically |
-| Layout | Render cover, sections, uploaded photos, and optional fallback illustration/styling | Builder can choose a simple fixed theme only | Storybook preview appears at the live URL |
+| Layout | Render a two-page aged-paper spread with illustration/photo material on the left and editable story text on the right | Builder can choose a simple fixed theme only | Storybook preview appears at the live URL |
 | Export | Generate/download/print-to-PDF from the storybook preview | If server PDF fails, browser print-to-PDF is the fallback | Reviewer can obtain a PDF/exported artifact during demo |
 
 Minimum automation for Revenue credibility:
@@ -620,6 +620,7 @@ M5 verification. Private keyed buyer URL flow is live and verified. Next: collec
 - Local private-key flow hides backend/payment controls and generated a storybook from sample audio.
 - Live private-key flow at `/?key=buyer-kk-001` hides backend/payment controls, generated a storybook from sample audio, and enabled export.
 - Live 6.4 MB audio upload at `/?key=buyer-6mb-live` generated a storybook through Convex storage and did not hit the JSON parse/request-size error.
+- Local Hindi audio generated a Devanagari storybook, and desktop/mobile visual QA passed for the two-page aged-paper spread with stamp illustration and Polaroid photo treatment.
 
 ### current blocker
 

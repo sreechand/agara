@@ -13,6 +13,8 @@ export type StorybookDraft = {
   closingNote: string;
   transcript: string;
   illustrationBrief: string;
+  stampSubject: string;
+  stampMotifs: string[];
   photoCaptions: string[];
 };
 
@@ -73,6 +75,8 @@ export function emptyDraft(): StorybookDraft {
     closingNote: "",
     transcript: "",
     illustrationBrief: "",
+    stampSubject: "",
+    stampMotifs: [],
     photoCaptions: []
   };
 }
@@ -98,7 +102,9 @@ export function demoDraft(input: Partial<IntakePayload> = {}): StorybookDraft {
     closingNote: `What ${elderName} wants remembered is not only the facts of a life, but the feeling of belonging to a family story.`,
     transcript:
       "Demo transcript placeholder. Add OPENAI_API_KEY to generate a real transcript from the uploaded audio.",
-    illustrationBrief: `A quiet storybook cover inspired by ${originPlace}, old family photographs, handwritten notes, and warm evening light.`,
+    illustrationBrief: `A small rubber-stamp field note of ${originPlace}, using only a market arch, a coffee tumbler, a winding lane, and a family doorway on aged paper.`,
+    stampSubject: `${originPlace} family memory`,
+    stampMotifs: ["market arch", "filter coffee tumbler", "winding lane", "family doorway"],
     photoCaptions: [
       `${elderName} and the people who make this story worth saving.`,
       `A place, object, or face that brings the memory back.`,
@@ -136,6 +142,10 @@ export function normalizeDraft(value: unknown, input: Partial<IntakePayload> = {
     closingNote: stringOr(source.closingNote, fallback.closingNote),
     transcript: stringOr(source.transcript, fallback.transcript),
     illustrationBrief: stringOr(source.illustrationBrief, fallback.illustrationBrief),
+    stampSubject: stringOr(source.stampSubject, fallback.stampSubject),
+    stampMotifs: Array.isArray(source.stampMotifs)
+      ? source.stampMotifs.map((motif) => String(motif)).slice(0, 6)
+      : fallback.stampMotifs,
     photoCaptions: Array.isArray(source.photoCaptions)
       ? source.photoCaptions.map((caption) => String(caption)).slice(0, 3)
       : fallback.photoCaptions
@@ -177,16 +187,23 @@ Return only valid JSON with this exact shape:
     {"id":"lesson","heading":"section heading","body":"120-180 words in warm storybook prose"}
   ],
   "closingNote": "one paragraph in the elder's spirit",
-  "illustrationBrief": "visual cover direction, no private data beyond names/places supplied",
+  "illustrationBrief": "one sentence visual direction for a small rubber-stamp field-note impression, no private data beyond names/places supplied",
+  "stampSubject": "the most distinctive place, object, food, room, landscape, or memory fragment to illustrate",
+  "stampMotifs": ["3 to 6 essential visual forms only, no labels, no people, no clutter"],
   "photoCaptions": ["caption 1", "caption 2", "caption 3"]
 }
 
 Rules:
+- First determine the dominant language and script used in the transcript. Write the title, subtitle, dedication, languageNote, section headings, section bodies, closingNote and photoCaptions in that same language and script.
+- If the transcript is Hindi, Tamil, Telugu, or another non-English language, do not translate the storybook into English.
+- If the transcript naturally mixes languages, preserve the same kind of code-switching and keep original family phrases, foods, places and relationship terms.
 - Do not invent major life events that are not in the transcript.
 - Keep emotional texture, places, foods, people and lessons.
 - If the transcript is thin, write a modest story and say what needs confirmation.
 - Preserve Indian family relationship terms and proper nouns.
 - Avoid melodrama. Make it feel like a family keepsake, not an obituary.
+- For stampSubject and stampMotifs, identify the minimum visual information needed for recognition: one landmark, object silhouette, food form, room arrangement, landscape contour, or family object. Do not make a catalogue.
+- Exclude people, crowds, vehicles, dense buildings, decorative clutter, slogans, captions, dates, labels and watermarks from the illustration concept.
 `;
 }
 
