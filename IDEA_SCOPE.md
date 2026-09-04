@@ -11,10 +11,10 @@
 | Build starts | Sat 29 Aug 2026, 11:00 AM IST |
 | Submission deadline | Sat 5 Sep 2026, 11:00 AM IST |
 | Demo | Sat 5 Sep 2026, 3:00 PM IST |
-| Current milestone | M1 live and verified with test input; M2 needs real UPI + buyer audio |
+| Current milestone | M5 verification; private keyed buyer link flow implemented locally and needs live deployment/verification |
 | Live URL | https://agara-puce.vercel.app |
 | Public repo | https://github.com/sreechand/agara |
-| Last updated | Thu 3 Sep 2026 |
+| Last updated | Fri 4 Sep 2026 |
 
 ### status language
 
@@ -33,12 +33,12 @@
 | The one person | A 30-45 year old parent/adult child who wants their child to know a grandparent's stories while the grandparent can still tell them. |
 | The one moment | They can get one elder on a call or in person for 10 minutes and want to turn that conversation into a meaningful family keepsake this week. |
 | Current workaround | The child asks questions informally, someone records a voice note, and the story stays buried in WhatsApp, memory, or scattered photos. |
-| Core action (user does X -> gets Y) | Buyer pays by UPI, uploads one audio recording plus optional family photos and names/places, then the product transcribes, drafts, structures, and renders an editable storybook with a downloadable PDF/export path. |
+| Core action (user does X -> gets Y) | Buyer pays outside the platform, opens a private keyed URL, uploads one audio recording plus optional family photos and names/places, then the product transcribes, drafts, structures, and renders an editable storybook with a downloadable PDF/export path. |
 | The one outcome the product must deliver | A gift-worthy, short storybook PDF that a family can read, save, and share. |
 | Hard input or hard case | A noisy 10-minute WhatsApp-style recording with mixed English/Hindi/Tamil/Telugu, family names, place names, and emotionally important details. |
 | Primary track | Revenue |
 | Riskiest assumption | People who say yes will pay Rs 400 and send usable audio quickly enough, and the automated transcription -> storybook draft -> PDF/export path is good enough that manual cleanup is quality control rather than the delivery mechanism. |
-| The 30-minute no-code test for it | Collect UPI payment from the two committed buyers and ask each to send one 3-10 minute recording before any build work continues. |
+| The 30-minute no-code test for it | Collect payment from the two committed buyers outside the platform, send each a keyed URL, and ask each to upload one 3-10 minute recording. |
 | First three users (names, where they are) | Buyer 1 from the seven messaged leads; Buyer 2 from the seven messaged leads; Buyer 3 from the remaining leads or one direct referral from Buyers 1-2. Replace with initials as soon as confirmed. |
 | Tuesday channel (where those users already gather) | Direct WhatsApp/DM referrals from the first buyers, plus the family/parent circles where they can forward the link privately. |
 | Personal artifact a user would screenshot | The storybook cover and first story page, with the grandparent's name, origin place, photograph if supplied, and a warm title. |
@@ -53,7 +53,7 @@ Families lose stories because elders are more comfortable speaking than typing, 
 
 #### decisive proof
 
-A stranger sees a live URL where they can pay externally by UPI, upload one interview audio file, add family details and optional photos, then watch the product automatically create an editable storybook draft with an exportable/downloadable PDF path. A reviewer sees the Saturday demo generate a storybook from a fresh recording without the builder rewriting it live, and then sees UPI payment proof, Convex first-use records, and completed PDF examples from real buyers.
+A stranger with a private keyed URL can upload one interview audio file, add family details and optional photos, then watch the product automatically create an editable storybook draft with an exportable/downloadable PDF path. A reviewer sees the Saturday demo generate a storybook from a fresh recording without the builder rewriting it live, and then sees external payment proof, Convex first-use records, and completed PDF examples from real buyers.
 
 ## 2. user and job
 
@@ -83,7 +83,7 @@ Advice, a transcript, an extraction, search results or a chat response alone do 
 
 ### golden path
 
-1. Buyer pays Rs 400 by UPI and receives or opens the product link.
+1. Buyer pays Rs 400 outside the platform and receives a private keyed product link.
 2. Buyer enters their email, grandparent/parent name, relationship label, language mix, names and places to preserve, and optional notes.
 3. Buyer uploads one audio file up to 10 minutes and optionally uploads 1-3 family photos.
 4. Product automatically transcribes the audio, generates a short storybook draft, chooses a structure, suggests a title/dedication/captions, and stores the run in Convex.
@@ -96,7 +96,7 @@ The product must automate the core transformation. Manual work is allowed only t
 
 | Step | Automated by product | Manual boundary | Demo requirement |
 |---|---|---|---|
-| Intake | Capture buyer details, helper names/places, audio, optional photos, payment status | Builder manually marks UPI payment received | Reviewer sees the run recorded in Convex |
+| Intake | Capture private key, buyer details, helper names/places, audio, and optional photos | Builder collects payment outside the platform before sending the key | Reviewer sees the keyed run recorded in Convex |
 | Transcription | Convert uploaded audio into transcript text | Builder or buyer may correct names, places, and mistranscribed phrases | Fresh demo audio produces a transcript without manual typing |
 | Story shaping | Turn transcript into title, dedication, 3-5 story sections, captions, and closing note | Buyer/builder may edit wording before export | Fresh demo transcript produces a coherent story draft automatically |
 | Layout | Render cover, sections, uploaded photos, and optional fallback illustration/styling | Builder can choose a simple fixed theme only | Storybook preview appears at the live URL |
@@ -132,7 +132,8 @@ These prompts are shown to the buyer before they record the conversation.
 
 | Input | Format/source | Hard characteristics | Validation |
 |---|---|---|---|
-| Payment proof | UPI screenshot or manual confirmation | Payment is outside the app | Admin marks payment received before final PDF delivery |
+| Access key | Query string or pasted key | Unique per buyer or story entry | Required before generation; saved with run |
+| Payment proof | External screenshot or manual confirmation | Payment is outside the app and not shown to the buyer in-product | Builder matches payment proof to the private key |
 | Buyer identity | Email and name | Must be real enough to identify the buyer | Required email field saved to Convex |
 | Relationship details | Text fields | Nani/Dadu/Ajji/Thatha/Patti/Aaji/Ajoba/generic labels | Required grandparent or parent name and relationship |
 | Audio recording | mp3, m4a, wav, mp4, webm where supported | Up to 10 minutes; mixed languages; background noise | File type check, size check, visible upload status |
@@ -147,18 +148,18 @@ These prompts are shown to the buyer before they record the conversation.
 | Transcription | Buyer/builder | Automatically generated editable text or stored transcript | Run detail screen |
 | Storybook draft | Buyer | Automatically generated editable title, dedication, sections, captions | Browser editor screenshot |
 | PDF/export | Buyer/family/reviewer | Downloadable PDF or browser-exportable storybook | PDF/export opens from live URL after generation |
-| Payment record | Builder/reviewer | UPI screenshot or logged payment status | Payment screenshot and status field |
+| Private key record | Builder/reviewer | Convex run with access key and buyer email | Convex dashboard screenshot filtered or inspected by key |
 
 ### what the product must remember
 
 - within one session: upload progress, transcript, generated storybook draft, edits before PDF export.
-- across sessions (Convex tables): buyer email, payment status, run status, uploaded file references, transcript text, storybook JSON, PDF URL if stored, timestamps.
+- across sessions (Convex tables): access key, buyer email, run status, uploaded file references, transcript text, storybook JSON if stored, PDF URL if stored, timestamps.
 - what it must deliberately forget: raw audio can be deleted after successful PDF export unless the buyer asks for regeneration; do not expose one family's private story to another user.
 
 ### human review boundary
 
 - What can be automated: transcription, first storybook draft, sectioning, title suggestions, dedication, caption suggestions, storybook preview, and PDF/export rendering.
-- What requires confirmation: payment received, final text approval by buyer, use of uploaded family photos, and whether optional illustrations are acceptable.
+- What requires confirmation: payment received outside the platform, final text approval by buyer, use of uploaded family photos, and whether optional illustrations are acceptable.
 - What must be escalated: failed transcription, unsupported language/audio, sensitive content the product cannot safely rewrite, or a buyer asking for print delivery.
 - How uncertainty is exposed: transcript screen highlights that names/places may need correction before story generation; storybook editor makes every generated section editable before export.
 - What manual cleanup is allowed for Build Week: correcting transcript errors and light copy edits after the product has generated a draft. It must not be the main way the storybook is created.
@@ -199,7 +200,7 @@ The personalized cover and first story page: grandparent/parent name, relationsh
 | PDF rendering | Browser/client or server PDF library | Implementation choice | Must render reliably on Vercel | Verify with live PDF download |
 | Data persistence | Convex | Tables for users, runs, storybooks, payments | Fixed event stack | Event brief |
 | Hosting | Vercel | Public deployment | Fixed event stack | Event brief |
-| Payments | Personal UPI | Manual UPI collection | Outside app; evidence is screenshot/manual status | Builder decision |
+| Payments | External/manual collection | Direct payment outside the product | Outside app; evidence is screenshot/manual confirmation matched to access key | Builder decision |
 
 ### unsupported assumptions
 
@@ -210,7 +211,7 @@ Capabilities that must not enter the critical path because they are unavailable,
 - Print-ready physical book fulfillment.
 - Fully automated transcript cleanup for mixed Indian languages.
 - Guaranteed generated illustrations.
-- Automatic payment verification through UPI APIs.
+- In-app payment collection or automatic payment verification.
 
 ### secrets and access
 
@@ -240,7 +241,7 @@ Pick **one primary track**: Virality, Revenue or AI Agent as a Service. You are 
 |---|---:|---:|---|---|---:|---|---|---|
 | Signups | 20x | 80 | L1: 0 product signups; 2 committed buyers outside product | L2: 1 to 50 signups | 20 | Convex table count with buyer email + first-use event | Signup/upload flow writes to Convex | M1-M2 |
 | Live product quality | 8x | 32 | L1: not built | L3: Working product, does what it claims | 16 | Stranger uploads audio, product auto-generates storybook draft, user edits and exports/downloads PDF at live URL | Build one complete automated flow with editor and PDF/export path | M1-M4 |
-| Revenue generated (USD) | 4x | 16 | L1: $0 collected | L2: Up to $100 | 4 | UPI payment screenshots totaling Rs 800+ | Collect payment before upload; record payment status | M0-M2 |
+| Revenue generated (USD) | 4x | 16 | L1: $0 collected | L2: Up to $100 | 4 | External payment screenshots totaling Rs 800+ matched to private keys | Collect payment before sharing buyer URL; record key mapping | M0-M2 |
 | Waitlist | 4x | 16 | L1: 0 | L2: 1 to 150 | 4 | Email/phone list in Convex or spreadsheet | Add "I want one" capture for unpaid interest | M3 |
 | Pain point severity | 2x | 8 | L3 candidate: named users, 1-2 conversations if quotes captured | L4: Named user, 3+ conversations confirming pain, quotes in submission | 6 | 3 short buyer quotes/screenshots | Ask why they are paying and what moment triggered it | M2-M4 |
 | SOM (bottoms-up math) | 2x | 8 | L1: not attempted | L3: Users x ACV correct, under Rs 10 cr | 4 | One written calculation in submission | Define beachhead and ACV using Rs 400 first-purchase price or realistic annual keepsake spend | M5 |
@@ -289,7 +290,7 @@ The two rows of my track I will build for:
 
 Rows that must work adequately but will not get disproportionate build time:
 
-- Revenue generated: collect Rs 400 payments manually by UPI and screenshot proof.
+- Revenue generated: collect Rs 400 payments outside the platform and screenshot proof matched to each private key.
 - Pain severity: capture short buyer quotes.
 - Waitlist: simple interest capture only.
 - SOM/right to win/why now/moat: honest written claims, no overbuilding.
@@ -332,7 +333,7 @@ Use the bands of your primary track (section 6). Keep only the rows your track s
 |---|---|---|---|---|
 | Signups / first-use events | Revenue | L2: 1 to 50 | L3: 51 to 250 is unlikely | Convex table count, screenshot |
 | Live product quality | Revenue | L2: rough MVP, happy path only | L3: working product, does what it claims | Buyer completes flow and downloads PDF |
-| Revenue generated | Revenue | L2: up to $100 | L3: $100 to $500 if 20+ buyers at Rs 400 | UPI screenshots and payment status |
+| Revenue generated | Revenue | L2: up to $100 | L3: $100 to $500 if 20+ buyers at Rs 400 | External payment screenshots matched to private keys |
 | Waitlist | Revenue | L2: 1 to 150 | L3: 151 to 750 unlikely | Convex/spreadsheet list |
 | Pain point severity | Revenue | L3: named user, 1-2 conversations | L4: named user, 3+ conversations and quotes | Screenshots/notes from buyers |
 | Visitors to product | Virality bonus | L1: under 50 | L2: 51 to 250 | PostHog / Plausible / GA4 / Datafast, read-only access shared |
@@ -342,7 +343,7 @@ Use the bands of your primary track (section 6). Keep only the rows your track s
 - Analytics tool installed on the live URL: PostHog, Plausible, GA4, or Datafast; choose the fastest available.
 - Read-only access created and the link saved: Required only if claiming visitor bonus; otherwise screenshot is still useful.
 - Signup or first-use event writes to Convex: Required for Revenue signups.
-- Payment link, if any: No payment link for v1; UPI collected personally and logged manually.
+- Payment link, if any: No payment link for v1; payment collected personally outside the app and matched to the buyer's access key.
 
 ### the numbers I will report on Saturday
 
@@ -350,7 +351,7 @@ One line per row, with the screenshot or link that proves it.
 
 - Signups: Convex screenshot showing non-test buyer rows with first-use event.
 - Live product quality: live URL demo where fresh audio automatically becomes an editable storybook draft plus completed PDF/export from buyer input.
-- Revenue generated: UPI payment screenshots and matching manual payment statuses.
+- Revenue generated: external payment screenshots and matching private access keys.
 - Waitlist: count of unpaid interested leads, if any.
 - Pain point severity: 2-3 buyer quotes about why they paid or what story they wanted preserved.
 - Visitors bonus if claimed: analytics screenshot/read-only link.
@@ -365,13 +366,13 @@ Every milestone has a purpose, what is required, an acceptance test, and an "if 
 
 Required:
 - Setup page complete: GitHub, Vercel, Convex accounts; Codex or Claude Code logged in; skills installed.
-- The riskiest assumption tested with no code: collect UPI payment from the two committed buyers and get one sample recording.
+- The riskiest assumption tested with no code: collect external payment from the two committed buyers and get one sample recording.
 - One representative hard input reaches the transcription API or model; response shape and latency understood.
 - Repository created, empty app deployed to Vercel, URL opens.
 
 Acceptance test:
 
-> The empty app is live at a public URL, the repo exists, at least one Rs 400 payment is collected, and one sample audio file has been transcribed.
+> The empty app is live at a public URL, the repo exists, at least one Rs 400 payment is collected outside the platform, and one sample audio file has been transcribed.
 
 Stop condition:
 
@@ -406,14 +407,15 @@ If I am behind, cut to: `one upload screen, automated transcript, one generated 
 
 Required:
 - three named users or buyers, reached directly;
-- payment status recorded for paid buyers;
+- external payment proof recorded for paid buyers;
+- one private key assigned to each buyer or story entry;
 - a signup or first-use event recorded in Convex for each product user;
 - notes on where each one stopped;
 - the single biggest blocker named.
 
 Acceptance test:
 
-> At least three rows in the Convex table that are not you, payment screenshots for paid users, and one sentence per user on where they stopped.
+> At least three rows in the Convex table that are not you, payment screenshots matched to private keys for paid users, and one sentence per user on where they stopped.
 
 If I am behind, cut to: `one paid user on a call, screen shared, completing the flow end to end.`
 
@@ -425,11 +427,11 @@ Required:
 - analytics live with read-only access if claiming visitor bonus;
 - direct-referral message written in your own words;
 - direct invites sent, count recorded;
-- signups, payments, and visitors checked that night.
+- signups, private-key runs, payments, and visitors checked that night.
 
 Acceptance test:
 
-> The direct invites are sent, and the visitors, signups, payment, and waitlist counts for the day are written down with screenshots.
+> The direct invites are sent, and the visitors, signups, private-key run, payment, and waitlist counts for the day are written down with screenshots.
 
 If I am behind, cut to: `ten direct messages, no public post.`
 
@@ -484,7 +486,7 @@ This turns a 10-minute family interview recording into an editable keepsake stor
 |---:|---|---|---|
 | 0-15s | who has this problem and what they do today | Families have voice notes and fading stories, not finished keepsakes | pain point severity |
 | 15-60s | the core action, live, on a fresh input | upload recording -> automated transcript -> automated story draft -> edit -> PDF/export | live product quality |
-| 60-90s | the numbers, reproduced live | Convex users/runs, UPI payment screenshots, completed buyer PDFs | signups, revenue generated |
+| 60-90s | the numbers, reproduced live | Convex keyed runs, external payment screenshots, completed buyer PDFs | signups, revenue generated |
 | 90-120s | what broke this week and what you changed | audio cleanup, names/places field, editable draft before PDF | live product quality, pain point severity |
 
 ### live input
@@ -501,7 +503,7 @@ Number of paid buyers and completed storybook PDFs, not impressions.
 
 ### claims I can prove
 
-- Buyers paid Rs 400 by UPI.
+- Buyers paid Rs 400 outside the platform.
 - The live product accepts audio and automatically generates an editable storybook draft.
 - The product exports or provides a reliable PDF path.
 - Convex recorded real first-use events.
@@ -538,7 +540,7 @@ Number of paid buyers and completed storybook PDFs, not impressions.
 
 | Risk | Probability | Damage | Earliest test | Mitigation | Fallback |
 |---|---|---|---|---|---|
-| Buyers say yes but do not pay | Medium | No Revenue proof | Before build | Collect UPI first | Switch to unpaid signup/waitlist, but Revenue score weakens |
+| Buyers say yes but do not pay | Medium | No Revenue proof | Before build | Collect payment before sending a keyed URL | Switch to unpaid signup/waitlist, but Revenue score weakens |
 | Buyers pay but do not send audio | Medium | No completed storybook | Before build | Ask for audio immediately after payment | Use one paid buyer plus demo-safe fallback input |
 | Transcription fails on mixed language | High | Poor product quality | M0 sample transcription | Add names/places field and editable transcript | Manual cleanup as QA, not core delivery |
 | PDF export breaks on Vercel/mobile | Medium | Cannot complete job | M1 live test | Use simple HTML-to-PDF or browser print fallback | Download HTML page as printable story |
@@ -583,13 +585,13 @@ Any change to these requires a written scope decision in section 15.
 
 ### active milestone
 
-M1 live and verified with real OpenAI automation and Convex evidence using a clearly labeled test input. Next: add public UPI display fields, collect UPI proof and real buyer audio.
+M5 verification. Private keyed buyer URL flow is implemented locally. Next: deploy it, verify the live keyed URL, then collect external payment proof and real buyer audio.
 
 ### implemented
 
 - Next.js app scaffold with upload/intake workbench.
 - OpenAI-backed generation API route with demo fallback when `OPENAI_API_KEY` is missing.
-- Convex schema and mutations for runs and waitlist evidence.
+- Convex schema and mutations for keyed runs and waitlist evidence.
 - Local evidence fallback when `NEXT_PUBLIC_CONVEX_URL` is missing.
 - Editable storybook preview with transcript review and PDF/export path.
 
@@ -612,16 +614,16 @@ M1 live and verified with real OpenAI automation and Convex evidence using a cle
 
 - Desktop and mobile screenshots have no horizontal overflow.
 - Generated storybook editor renders with export enabled.
-- Live URL shows `Convex evidence`.
-- Live URL generated a storybook from sample audio in 16s and enabled export.
+- Previous live URL generated a storybook from sample audio in 16s and enabled export.
+- Local private-key flow hides backend/payment controls and generated a storybook from sample audio.
 
 ### current blocker
 
-Need `NEXT_PUBLIC_UPI_ID` and `NEXT_PUBLIC_UPI_NAME` in local and Vercel envs, first UPI payment proof, and first usable buyer audio sample. OpenAI and Convex are working on the live URL.
+Need the private-key flow deployed to Vercel, first external payment proof, and first usable buyer audio sample. OpenAI and Convex are working.
 
 ### next single action
 
-Add `NEXT_PUBLIC_UPI_ID` and `NEXT_PUBLIC_UPI_NAME` to `.env.local` and Vercel production envs, redeploy, then collect Rs 400 by UPI from one committed buyer and ask them to send a 3-10 minute recording using the 12 prompts.
+Deploy the private-key flow, verify `https://agara-puce.vercel.app/?key=buyer-kk-001`, then collect Rs 400 from one committed buyer outside the app and ask them to upload a 3-10 minute recording using the 12 prompts.
 
 ## 15. decision log
 
@@ -630,6 +632,7 @@ Add `NEXT_PUBLIC_UPI_ID` and `NEXT_PUBLIC_UPI_NAME` to `.env.local` and Vercel p
 | Thu 3 Sep 2026 | Chose Revenue as primary track | Builder changed from Virality to Revenue | Optimize for paid buyers, signups, product quality |
 | Thu 3 Sep 2026 | Rejected water/non-profit as initial Revenue market | Builder believes sector is unlikely to pay this week | Search shifted to paid gifting product |
 | Thu 3 Sep 2026 | Locked family storybook from grandparent interview | 2 of 7 messaged leads said yes and are ready to pay Rs 400 | Build one paid audio-to-storybook flow |
-| Thu 3 Sep 2026 | Payment is manual UPI before upload | Builder decision | App logs payment status manually; no payment integration |
+| Thu 3 Sep 2026 | Payment happens outside the app before upload | Builder decision | App records the private key and run; no payment UI or payment integration |
 | Thu 3 Sep 2026 | Audio upload is required; typed answers are not the core | Grandparents may not type comfortably | Build transcription and edit flow |
 | Thu 3 Sep 2026 | Illustrations are optional fallback | API/access/time risk | PDF must still be valuable without generated images |
+| Fri 4 Sep 2026 | Hide backend/payment controls and use private keyed buyer URLs | Builder decision to collect payment outside the platform | No login, no in-app payment fields; each run saves an access key for evidence |

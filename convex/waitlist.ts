@@ -7,6 +7,7 @@ export const add = mutation({
     email: v.string(),
     note: v.optional(v.string())
   },
+  returns: v.id("waitlist"),
   handler: async (ctx, args) => {
     return await ctx.db.insert("waitlist", {
       ...args,

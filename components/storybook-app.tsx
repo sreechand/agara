@@ -6,7 +6,7 @@ import {
   CheckCircle2,
   Download,
   ImagePlus,
-  IndianRupee,
+  KeyRound,
   Loader2,
   Mic,
   Printer,
@@ -14,6 +14,7 @@ import {
   Upload
 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { useEvidence } from "@/app/providers";
 import { readPhotoPreviews, validateAudioFile, type PhotoPreview } from "@/lib/files";
@@ -27,6 +28,7 @@ import {
 } from "@/lib/storybook";
 
 const initialIntake: IntakePayload = {
+  accessKey: "",
   buyerName: "",
   email: "",
   elderName: "",
@@ -35,7 +37,7 @@ const initialIntake: IntakePayload = {
   languageMix: "English + Hindi/Tamil/Telugu mixed",
   preserveWords: "",
   dedication: "",
-  paymentReference: "",
+  paymentReference: "external",
   notes: ""
 };
 
@@ -49,15 +51,19 @@ type GenerateResponse = {
 
 export function StorybookApp() {
   const evidence = useEvidence();
+  const searchParams = useSearchParams();
   const runIdRef = useRef<string | null>(null);
   const [intake, setIntake] = useState(initialIntake);
   const [audio, setAudio] = useState<File | null>(null);
   const [photos, setPhotos] = useState<PhotoPreview[]>([]);
   const [draft, setDraft] = useState<StorybookDraft>(emptyDraft());
   const [status, setStatus] = useState<"idle" | "generating" | "ready" | "failed">("idle");
-  const [paymentReceived, setPaymentReceived] = useState(false);
   const [message, setMessage] = useState("");
   const [warning, setWarning] = useState("");
+
+  const urlAccessKey = searchParams.get("key")?.trim() || "";
+  const accessKey = intake.accessKey || urlAccessKey;
+  const paymentReference = accessKey ? `external:${accessKey}` : "external";
 
   const requiredMissing = useMemo(
     () =>
@@ -67,14 +73,12 @@ export function StorybookApp() {
         intake.elderName,
         intake.relationship,
         intake.originPlace,
-        intake.paymentReference
+        accessKey
       ].some((value) => !value.trim()),
-    [intake]
+    [accessKey, intake]
   );
 
   const canGenerate = Boolean(audio) && !requiredMissing && status !== "generating";
-  const upiId = process.env.NEXT_PUBLIC_UPI_ID;
-  const upiName = process.env.NEXT_PUBLIC_UPI_NAME || "Sreechand";
 
   async function handleGenerate() {
     setMessage("");
@@ -89,20 +93,20 @@ export function StorybookApp() {
 
     if (requiredMissing) {
       setStatus("failed");
-      setMessage("Fill the buyer, elder, place, relationship, and payment fields first.");
+      setMessage("Open your private story link, then fill the buyer, elder, place, and relationship fields.");
       return;
     }
 
-    const paymentStatus = paymentReceived ? "received" : "pending";
     const runId = await evidence.createRun({
+      accessKey,
       buyerName: intake.buyerName,
       email: intake.email,
       elderName: intake.elderName,
       relationship: intake.relationship,
       originPlace: intake.originPlace,
       languageMix: intake.languageMix,
-      paymentReference: intake.paymentReference,
-      paymentStatus,
+      paymentReference,
+      paymentStatus: "received",
       hasAudio: Boolean(audio),
       photoCount: photos.length
     });
@@ -113,7 +117,9 @@ export function StorybookApp() {
       await evidence.markGenerating(runId);
 
       const body = new FormData();
-      Object.entries(intake).forEach(([key, value]) => body.append(key, value));
+      Object.entries({ ...intake, accessKey, paymentReference }).forEach(([key, value]) =>
+        body.append(key, value)
+      );
       body.append("audio", audio as File);
 
       const response = await fetch("/api/generate-storybook", {
@@ -184,13 +190,13 @@ export function StorybookApp() {
       elderName: "Lakshmi",
       relationship: "Ajji",
       originPlace: "Mysuru",
+      accessKey: "demo-rehearsal",
       preserveWords: "Lakshmi, Mysuru, Devaraja Market, filter coffee",
       dedication: "For the grandchildren who should know where the family stories began.",
-      paymentReference: "UPI-demo-400",
+      paymentReference: "external:demo-rehearsal",
       notes: "Demo-safe fallback for rehearsal."
     };
     setIntake(seeded);
-    setPaymentReceived(true);
     setDraft(demoDraft(seeded));
     setStatus("ready");
     setMessage("Demo draft loaded. Use this only for rehearsal if live generation is unavailable.");
@@ -207,9 +213,9 @@ export function StorybookApp() {
             editable keepsake storybook and export it for the family.
           </p>
         </div>
-        <div className="proof-strip" aria-label="Revenue proof state">
+        <div className="proof-strip" aria-label="Storybook constraints">
           <span>
-            <IndianRupee size={16} aria-hidden /> Rs 400
+            <KeyRound size={16} aria-hidden /> Private link
           </span>
           <span>
             <Mic size={16} aria-hidden /> 10 min audio
@@ -225,35 +231,34 @@ export function StorybookApp() {
           <div className="panel-heading">
             <div>
               <p className="eyebrow">Intake</p>
-              <h2>Payment, recording, family details</h2>
+              <h2>Recording and family details</h2>
             </div>
-            <span className={`backend-pill ${evidence.backend}`}>
-              {evidence.backend === "convex" ? "Convex evidence" : "Local evidence"}
-            </span>
           </div>
 
-          {evidence.backend === "local" ? (
-            <div className="notice warning">
-              <AlertTriangle size={18} aria-hidden />
-              <span>Set NEXT_PUBLIC_CONVEX_URL before claiming Convex evidence.</span>
-            </div>
-          ) : null}
-
-          <div className="payment-box">
+          <div className={`access-box ${accessKey ? "ready" : "missing"}`}>
+            <KeyRound size={20} aria-hidden />
             <div>
-              <p className="field-label">Collect before upload</p>
-              <strong>Rs 400 by UPI</strong>
-              <span>{upiId ? `${upiName} - ${upiId}` : "Add UPI details in .env.local"}</span>
+              <p className="field-label">Private story link</p>
+              <strong>{accessKey ? "Ready to begin" : "Access key missing"}</strong>
+              <span>
+                {accessKey
+                  ? "This storybook will be saved against your private key."
+                  : "Use the custom link you received, or paste the key below."}
+              </span>
             </div>
-            <label className="check-row">
-              <input
-                type="checkbox"
-                checked={paymentReceived}
-                onChange={(event) => setPaymentReceived(event.target.checked)}
-              />
-              Payment received
-            </label>
           </div>
+
+          <TextField
+            label="Access key"
+            value={accessKey}
+            onChange={(value) =>
+              setIntake((current) => ({
+                ...current,
+                accessKey: value,
+                paymentReference: value ? `external:${value}` : "external"
+              }))
+            }
+          />
 
           <div className="field-grid">
             <TextField
@@ -281,11 +286,6 @@ export function StorybookApp() {
               label="Origin place"
               value={intake.originPlace}
               onChange={(value) => updateIntake("originPlace", value)}
-            />
-            <TextField
-              label="Payment reference"
-              value={intake.paymentReference}
-              onChange={(value) => updateIntake("paymentReference", value)}
             />
           </div>
 
@@ -454,11 +454,12 @@ function StorybookEditor({
     <article className="book">
       <section className="book-cover">
         <div className="cover-mark">Family Story</div>
-        <input
+        <textarea
           className="book-title"
           value={draft.title}
           onChange={(event) => onDraftChange("title", event.target.value)}
           aria-label="Storybook title"
+          rows={2}
         />
         <input
           className="book-subtitle"

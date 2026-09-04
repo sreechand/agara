@@ -62,6 +62,7 @@ export async function POST(request: Request) {
 
 function readIntake(formData: FormData): IntakePayload {
   return {
+    accessKey: getText(formData, "accessKey"),
     buyerName: getText(formData, "buyerName"),
     email: getText(formData, "email"),
     elderName: getText(formData, "elderName"),

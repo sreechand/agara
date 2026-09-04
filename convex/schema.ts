@@ -3,6 +3,7 @@ import { v } from "convex/values";
 
 export default defineSchema({
   runs: defineTable({
+    accessKey: v.optional(v.string()),
     buyerName: v.string(),
     email: v.string(),
     elderName: v.string(),
@@ -25,6 +26,7 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number()
   })
+    .index("by_access_key", ["accessKey"])
     .index("by_email", ["email"])
     .index("by_status", ["status"]),
 

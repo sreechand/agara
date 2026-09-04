@@ -12,6 +12,7 @@ import { ConvexProvider, ConvexReactClient, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
 type CreateRunInput = {
+  accessKey?: string;
   buyerName: string;
   email: string;
   elderName: string;

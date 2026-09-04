@@ -17,6 +17,7 @@ export type StorybookDraft = {
 };
 
 export type IntakePayload = {
+  accessKey: string;
   buyerName: string;
   email: string;
   elderName: string;

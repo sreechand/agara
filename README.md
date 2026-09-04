@@ -15,8 +15,6 @@ npm install
 ```bash
 OPENAI_API_KEY=
 NEXT_PUBLIC_CONVEX_URL=
-NEXT_PUBLIC_UPI_ID=
-NEXT_PUBLIC_UPI_NAME=
 ```
 
 3. Start Convex in another terminal:
@@ -32,3 +30,13 @@ npm run dev
 ```
 
 If `OPENAI_API_KEY` is missing, the app runs in demo mode so the UI and export path can still be verified. Production Revenue proof should use real transcription and story generation.
+
+## Buyer links
+
+Collect payment outside the app, then send each buyer a private keyed URL:
+
+```text
+https://your-vercel-url.vercel.app/?key=buyer-kk-001
+```
+
+The key is saved with the Convex run for Build Week evidence and buyer tracking. It is not authentication or a security boundary, so do not treat it as a private archive link after the PDF is exported.
